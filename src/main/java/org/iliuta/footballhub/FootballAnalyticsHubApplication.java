@@ -1,4 +1,4 @@
-package com.iliuta.footballhub;
+package org.iliuta.footballhub;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
