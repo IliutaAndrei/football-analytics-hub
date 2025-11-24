@@ -13,7 +13,7 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-football:
-  api:
+api:
+  football:
     base-url: "${FOOTBALL_API_BASE_URL}"
     key: "${FOOTBALL_API_KEY}"
