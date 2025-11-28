@@ -1,4 +1,7 @@
 package org.iliuta.footballhub.client.dto.statistics;
 
-public record ExternalLineUpDTO() {
+public record ExternalLineUpDTO(
+        String formation,
+        Integer played
+) {
 }

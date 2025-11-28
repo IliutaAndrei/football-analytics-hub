@@ -1,6 +1,6 @@
 package org.iliuta.footballhub.client.dto.statistics;
 
-public record ExternalFailedToScoreDTO(
+public record ExternalStatSummaryDTO(
         Integer home,
         Integer away,
         Integer total
