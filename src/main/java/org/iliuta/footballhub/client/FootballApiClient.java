@@ -1,6 +1,7 @@
 package org.iliuta.footballhub.client;
 
 import org.iliuta.footballhub.client.dto.league.ExternalLeagueResponseDTO;
+import org.iliuta.footballhub.client.dto.statistics.ExternalTeamStatisticsResponseDTO;
 import org.iliuta.footballhub.client.dto.team.ExternalTeamResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -36,6 +37,22 @@ public class FootballApiClient {
                         .build())
                 .retrieve()
                 .bodyToMono(ExternalTeamResponseDTO.class)
+                .block();
+    }
+
+    public ExternalTeamStatisticsResponseDTO getStatisticsByLeagueIdAndTeamIdAndSeasonYear(
+            Integer leagueId, Integer teamId, Integer seasonYear
+    ) {
+        return footballClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams/statistics")
+                        .queryParam("league", leagueId)
+                        .queryParam("team", teamId)
+                        .queryParam("season", seasonYear)
+                        .build())
+                .retrieve()
+                .bodyToMono(ExternalTeamStatisticsResponseDTO.class)
                 .block();
     }
 }
