@@ -1,6 +1,7 @@
 package org.iliuta.footballhub.client;
 
 import org.iliuta.footballhub.client.dto.league.ExternalLeagueResponseDTO;
+import org.iliuta.footballhub.client.dto.seasons.ExternalTeamSeasonsResponseDTO;
 import org.iliuta.footballhub.client.dto.statistics.ExternalTeamStatisticsDTO;
 import org.iliuta.footballhub.client.dto.statistics.ExternalTeamStatisticsResponseDTO;
 import org.iliuta.footballhub.client.dto.team.ExternalTeamResponseDTO;
@@ -56,5 +57,18 @@ public class FootballApiClient {
                 .bodyToMono(ExternalTeamStatisticsResponseDTO.class)
                 .block();
 
+    }
+
+    public ExternalTeamSeasonsResponseDTO getSeasonsByTeamId(Integer teamId) {
+
+        return footballClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams/seasons")
+                        .queryParam("team", teamId)
+                        .build())
+                .retrieve()
+                .bodyToMono(ExternalTeamSeasonsResponseDTO.class)
+                .block();
     }
 }
