@@ -1,17 +1,9 @@
 package org.iliuta.footballhub.client.dto.statistics;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record ExternalTeamStatisticsResponseDTO(
-        ExternalLeagueDTO league,
-        ExternalTeamDTO team,
-        String form,
-        ExternalFixtureDTO fixtures,
-        ExternalGoalDTO goals,
-        ExternalBiggestDTO biggest,
-        ExternalCleanSheetDTO cleanSheet,
-        ExternalFailedToScoreDTO failedToScore,
-        ExternalPenaltyDTO penalty,
-        List<ExternalLineUpDTO> lineUps,
-        ExternalCardDTO cards
-) { }
+        @JsonProperty("response")
+        ExternalTeamStatisticsDTO response
+) {
+}

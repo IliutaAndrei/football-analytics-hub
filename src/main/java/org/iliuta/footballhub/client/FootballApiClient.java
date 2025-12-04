@@ -1,6 +1,7 @@
 package org.iliuta.footballhub.client;
 
 import org.iliuta.footballhub.client.dto.league.ExternalLeagueResponseDTO;
+import org.iliuta.footballhub.client.dto.statistics.ExternalTeamStatisticsDTO;
 import org.iliuta.footballhub.client.dto.statistics.ExternalTeamStatisticsResponseDTO;
 import org.iliuta.footballhub.client.dto.team.ExternalTeamResponseDTO;
 import org.springframework.stereotype.Service;
@@ -54,5 +55,6 @@ public class FootballApiClient {
                 .retrieve()
                 .bodyToMono(ExternalTeamStatisticsResponseDTO.class)
                 .block();
+
     }
 }
