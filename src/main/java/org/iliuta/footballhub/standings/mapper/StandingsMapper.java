@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 public interface StandingsMapper {
 
     @Mapping(source = "all", target = "summary")
+    @Mapping(source = "form", target = "form")
     StandingDTO toStandingDTO(ExternalStandingsSummaryDTO external);
 
     TeamDTO toTeamDTO(ExternalTeamSummaryDTO external);

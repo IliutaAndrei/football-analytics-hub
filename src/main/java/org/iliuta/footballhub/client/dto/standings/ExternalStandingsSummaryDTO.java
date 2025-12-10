@@ -5,6 +5,7 @@ public record ExternalStandingsSummaryDTO(
         ExternalTeamSummaryDTO team,
         Integer points,
         Integer goalsDiff,
+        String form,
         ExternalTeamMatchStatsDTO all
 
 ) {
