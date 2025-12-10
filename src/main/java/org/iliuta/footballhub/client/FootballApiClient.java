@@ -2,6 +2,7 @@ package org.iliuta.footballhub.client;
 
 import org.iliuta.footballhub.client.dto.league.ExternalLeagueResponseDTO;
 import org.iliuta.footballhub.client.dto.seasons.ExternalTeamSeasonsResponseDTO;
+import org.iliuta.footballhub.client.dto.standings.ExternalStandingsResponseDTO;
 import org.iliuta.footballhub.client.dto.statistics.ExternalTeamStatisticsResponseDTO;
 import org.iliuta.footballhub.client.dto.team.ExternalTeamResponseDTO;
 import org.springframework.stereotype.Service;
@@ -42,8 +43,7 @@ public class FootballApiClient {
     }
 
     public ExternalTeamStatisticsResponseDTO getStatisticsByLeagueIdAndTeamIdAndSeasonYear(
-            Integer leagueId, Integer teamId, Integer seasonYear
-    ) {
+            Integer leagueId, Integer teamId, Integer seasonYear) {
         return footballClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -59,7 +59,6 @@ public class FootballApiClient {
     }
 
     public ExternalTeamSeasonsResponseDTO getSeasonsByTeamId(Integer teamId) {
-
         return footballClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -68,6 +67,18 @@ public class FootballApiClient {
                         .build())
                 .retrieve()
                 .bodyToMono(ExternalTeamSeasonsResponseDTO.class)
+                .block();
+    }
+
+    public ExternalStandingsResponseDTO getStandingsByLeagueIdAndSeasonYear(
+            Integer leagueId, Integer seasonYear) {
+        return footballClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/standings")
+                        .queryParam("league", leagueId)
+                        .queryParam("season", seasonYear).build())
+                .retrieve().bodyToMono(ExternalStandingsResponseDTO.class)
                 .block();
     }
 }
