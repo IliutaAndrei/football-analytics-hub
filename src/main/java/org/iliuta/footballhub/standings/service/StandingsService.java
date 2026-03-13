@@ -1,7 +1,6 @@
 package org.iliuta.footballhub.standings.service;
 
 import org.iliuta.footballhub.client.FootballApiClient;
-import org.iliuta.footballhub.client.dto.standings.ExternalStandingsDTO;
 import org.iliuta.footballhub.client.dto.standings.ExternalStandingsSummaryDTO;
 import org.iliuta.footballhub.standings.dto.StandingDTO;
 import org.iliuta.footballhub.standings.dto.StandingsResponseDTO;
@@ -50,6 +49,7 @@ public class StandingsService {
                 league.logo(),
                 league.flag(),
                 league.season(),
-                standingList);
+                standingList
+        );
     }
 }

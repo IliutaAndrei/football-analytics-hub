@@ -1,6 +1,5 @@
 package org.iliuta.footballhub.client;
 
-import org.iliuta.footballhub.client.dto.fixtures.ExternalFixtureResponseDTO;
 import org.iliuta.footballhub.client.dto.leagues.ExternalLeagueResponseDTO;
 import org.iliuta.footballhub.client.dto.seasons.ExternalTeamSeasonsResponseDTO;
 import org.iliuta.footballhub.client.dto.standings.ExternalStandingsResponseDTO;
@@ -78,26 +77,8 @@ public class FootballApiClient {
                 .uri(uriBuilder -> uriBuilder
                         .path("/standings")
                         .queryParam("league", leagueId)
-                        .queryParam("season", seasonYear)
-                        .build())
-                .retrieve()
-                .bodyToMono(ExternalStandingsResponseDTO.class)
-                .block();
-    }
-
-    public ExternalFixtureResponseDTO getFixturesByLeagueIdAndSeasonYearAndTeamId(
-            Integer leagueId, Integer seasonYear, Integer teamId
-    ) {
-        return footballClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/fixtures")
-                        .queryParam("league", leagueId)
-                        .queryParam("season", seasonYear)
-                        .queryParam("team", teamId)
-                        .build())
-                .retrieve()
-                .bodyToMono(ExternalFixtureResponseDTO.class)
+                        .queryParam("season", seasonYear).build())
+                .retrieve().bodyToMono(ExternalStandingsResponseDTO.class)
                 .block();
     }
 }
