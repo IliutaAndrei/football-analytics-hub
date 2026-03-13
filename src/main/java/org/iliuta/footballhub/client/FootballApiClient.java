@@ -77,8 +77,10 @@ public class FootballApiClient {
                 .uri(uriBuilder -> uriBuilder
                         .path("/standings")
                         .queryParam("league", leagueId)
-                        .queryParam("season", seasonYear).build())
-                .retrieve().bodyToMono(ExternalStandingsResponseDTO.class)
+                        .queryParam("season", seasonYear)
+                        .build())
+                .retrieve()
+                .bodyToMono(ExternalStandingsResponseDTO.class)
                 .block();
     }
 }
