@@ -1,5 +1,7 @@
 package org.iliuta.footballhub.client;
 
+import org.iliuta.footballhub.client.dto.countries.ExternalCountryDTO;
+import org.iliuta.footballhub.client.dto.countries.ExternalCountryResponseDTO;
 import org.iliuta.footballhub.client.dto.leagues.ExternalLeagueResponseDTO;
 import org.iliuta.footballhub.client.dto.seasons.ExternalTeamSeasonsResponseDTO;
 import org.iliuta.footballhub.client.dto.standings.ExternalStandingsResponseDTO;
@@ -15,6 +17,15 @@ public class FootballApiClient {
 
     public FootballApiClient(WebClient footballClient) {
         this.footballClient = footballClient;
+    }
+
+    public ExternalCountryResponseDTO getAllCountries() {
+        return footballClient
+                .get()
+                .uri("/countries")
+                .retrieve()
+                .bodyToMono(ExternalCountryResponseDTO.class)
+                .block();
     }
 
     public ExternalLeagueResponseDTO getLeaguesByCountry(String countryCode) {

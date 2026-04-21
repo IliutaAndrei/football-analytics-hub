@@ -1,50 +1,74 @@
 package org.iliuta.footballhub.leagues.service;
 
 import org.iliuta.footballhub.client.FootballApiClient;
-import org.iliuta.footballhub.client.dto.leagues.ExternalCountryDTO;
 import org.iliuta.footballhub.client.dto.leagues.ExternalLeagueInfoDTO;
 import org.iliuta.footballhub.client.dto.leagues.ExternalSeasonDTO;
 import org.iliuta.footballhub.countries.CountryEntity;
-import org.iliuta.footballhub.countries.CountryRepository;
+import org.iliuta.footballhub.countries.service.CountryService;
 import org.iliuta.footballhub.leagues.LeagueEntity;
 import org.iliuta.footballhub.leagues.LeagueRepository;
 import org.iliuta.footballhub.leagues.SeasonEntity;
 import org.iliuta.footballhub.leagues.SeasonRepository;
+import org.iliuta.footballhub.leagues.dto.LeagueDTO;
+import org.iliuta.footballhub.leagues.dto.SeasonDTO;
 import org.iliuta.footballhub.leagues.mapper.ExternalLeagueMapper;
+import org.iliuta.footballhub.leagues.mapper.InternalLeagueMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
 
 @Service
 @Transactional
 public class LeagueService {
 
-    private final CountryRepository countryRepository;
     private final SeasonRepository seasonRepository;
+    private final CountryService countryService;
     private final LeagueRepository leagueRepository;
     private final ExternalLeagueMapper externalLeagueMapper;
+    private final InternalLeagueMapper internalLeagueMapper;
     private final FootballApiClient footballApiClient;
 
-    public LeagueService(CountryRepository countryRepository,
-                         SeasonRepository seasonRepository,
-                         LeagueRepository leagueRepository,
-                         ExternalLeagueMapper externalLeagueMapper,
-                         FootballApiClient footballApiClient) {
-        this.countryRepository = countryRepository;
+    public LeagueService(
+            SeasonRepository seasonRepository, CountryService countryService,
+            LeagueRepository leagueRepository,
+            ExternalLeagueMapper externalLeagueMapper, InternalLeagueMapper internalLeagueMapper,
+            FootballApiClient footballApiClient) {
         this.seasonRepository = seasonRepository;
+        this.countryService = countryService;
         this.leagueRepository = leagueRepository;
         this.externalLeagueMapper = externalLeagueMapper;
+        this.internalLeagueMapper = internalLeagueMapper;
         this.footballApiClient = footballApiClient;
     }
 
     public void syncLeaguesByCountry(String countryCode) {
         var response = footballApiClient.getLeaguesByCountry(countryCode);
         for (var dto : response.response()) {
-            CountryEntity country = syncCountry(dto.country());
+            CountryEntity country = countryService.syncCountry(dto.country());
             LeagueEntity league = syncLeague(dto.league(), country);
             for (var seasonDto : dto.seasons()) {
                 syncSeason(seasonDto, league);
             }
         }
+    }
+
+    public List<LeagueDTO> getLeaguesByCountryCode(String code) {
+        var leagues = leagueRepository.findByCountry_Code(code);
+
+        if (leagues.isEmpty()) {
+            syncLeaguesByCountry(code);
+            leagues = leagueRepository.findByCountry_Code(code);
+        }
+
+        return internalLeagueMapper.toLeagueDTOs(leagues);
+    }
+
+    public List<SeasonDTO> getSeasonsByLeagueId(Integer id) {
+        var seasons = seasonRepository.findByLeague_Id(id);
+
+        return internalLeagueMapper.toSeasonDTOs(seasons);
     }
 
     private SeasonEntity syncSeason(ExternalSeasonDTO external, LeagueEntity league) {
@@ -84,18 +108,5 @@ public class LeagueService {
         return leagueRepository.save(newLeague);
     }
 
-    private CountryEntity syncCountry(ExternalCountryDTO external) {
 
-        var existing = countryRepository.findByCode(external.code());
-
-        if (existing.isPresent()) {
-            var country = existing.get();
-            externalLeagueMapper.updateCountryEntity(country, external);
-
-            return country;
-        }
-
-        var newCountry = externalLeagueMapper.toCountryEntity(external);
-        return countryRepository.save(newCountry);
-    }
 }
