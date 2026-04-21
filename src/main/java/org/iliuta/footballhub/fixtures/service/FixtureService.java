@@ -1,4 +1,4 @@
-package org.iliuta.footballhub.fixtures.serviec;
+package org.iliuta.footballhub.fixtures.service;
 
 import org.springframework.stereotype.Service;
 

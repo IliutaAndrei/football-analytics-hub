@@ -10,4 +10,5 @@ public interface LeagueRepository extends JpaRepository<LeagueEntity, Integer> {
     Optional<LeagueEntity> findByExternalId(Integer externalId);
 
     List<LeagueEntity> findByCountry_Code(String countryCode);
+
 }
