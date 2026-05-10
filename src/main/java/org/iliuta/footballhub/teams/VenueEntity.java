@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,6 +26,6 @@ public class VenueEntity {
     private String surface;
     private String image;
 
-    @OneToOne(mappedBy = "venue",orphanRemoval = true)
-    private TeamEntity team;
+    @OneToMany(mappedBy = "venue")
+    private List<TeamEntity> team;
 }

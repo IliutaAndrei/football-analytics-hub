@@ -22,6 +22,11 @@ public class WebClientConfig {
                 .baseUrl(baseUrl)
                 .defaultHeader("x-apisports-key", apiKey)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .codecs(clientCodecConfigurer -> {
+                    clientCodecConfigurer
+                            .defaultCodecs()
+                            .maxInMemorySize(2 * 1024 * 1024);
+                })
                 .build();
     }
 }

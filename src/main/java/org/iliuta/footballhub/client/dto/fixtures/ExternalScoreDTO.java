@@ -6,6 +6,10 @@ public record ExternalScoreDTO(
         @JsonProperty("halftime")
         ExternalScoreSummaryDTO halfTime,
         @JsonProperty("fulltime")
-        ExternalScoreSummaryDTO fullTime
+        ExternalScoreSummaryDTO fullTime,
+        @JsonProperty("extratime")
+        ExternalScoreSummaryDTO extraTime,
+
+        ExternalScoreSummaryDTO penalty
 ) {
 }

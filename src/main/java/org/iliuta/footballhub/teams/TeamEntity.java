@@ -34,7 +34,7 @@ public class TeamEntity {
     @JoinColumn(name = "league_id")
     private LeagueEntity league;
 
-    @OneToOne(orphanRemoval = true)
+    @ManyToOne
     @JoinColumn(name = "venue_id")
     private VenueEntity venue;
 }

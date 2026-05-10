@@ -1,6 +1,6 @@
-package org.iliuta.footballhub.client.dto.fixtures;
+package org.iliuta.footballhub.fixtures.dto;
 
-public record ExternalFixtureLeagueDTO(
+public record FixtureLeagueDTO(
         Integer id,
         String name,
         String country,

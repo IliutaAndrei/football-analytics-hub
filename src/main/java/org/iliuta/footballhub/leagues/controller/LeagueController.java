@@ -9,12 +9,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/leagues")
 @RequiredArgsConstructor
 public class LeagueController {
 
     private final LeagueService leagueService;
+
+    @PostMapping("/sync/{countryCode}")
+    public ResponseEntity<Void> syncLeagues(@PathVariable String countryCode) {
+        leagueService.syncLeaguesByCountry(countryCode);
+        return ResponseEntity.noContent().build();
+    }
 
     @GetMapping("/country/{code}")
     public ResponseEntity<List<LeagueDTO>> getLeaguesByCountry(@PathVariable String code) {

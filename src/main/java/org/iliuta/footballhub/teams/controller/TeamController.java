@@ -1,39 +1,38 @@
 package org.iliuta.footballhub.teams.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.iliuta.footballhub.teams.TeamRepository;
 import org.iliuta.footballhub.teams.dto.TeamDTO;
-import org.iliuta.footballhub.teams.mapper.InternalTeamMapper;
 import org.iliuta.footballhub.teams.service.TeamService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin
 @RestController
-@RequestMapping("api/teams")
+@RequestMapping("api/leagues")
 @RequiredArgsConstructor
 public class TeamController {
 
-    private final TeamRepository teamRepository;
     private final TeamService teamService;
-    private final InternalTeamMapper internalTeamMapper;
 
-    @PostMapping("/sync/{leagueId}/{seasonYear}")
-    public ResponseEntity<Void> syncTeamsByLeagueAndSeason(
-            @PathVariable("leagueId") Integer leagueId, @PathVariable("seasonYear") Integer seasonYear) {
-        teamService.syncTeamByLeagueAndSeason(leagueId, seasonYear);
 
-        return ResponseEntity.noContent().build();
+    @GetMapping("/{leagueId}/seasons/{seasonYear}/teams/{teamId}")
+    public ResponseEntity<TeamDTO> getTeamById(
+            @PathVariable Integer leagueId,
+            @PathVariable Integer seasonYear,
+            @PathVariable Integer teamId) {
+        var team = teamService.getTeamByIdInContext(teamId, leagueId, seasonYear);
+
+        return ResponseEntity.ok(team);
     }
 
-    @GetMapping("/league/{leagueId}/season/{seasonYear}")
-    public ResponseEntity<List<TeamDTO>> getTeamsByLeagueIdAndSeasonYear(
+    @GetMapping("/{leagueId}/seasons/{seasonYear}/teams")
+    public ResponseEntity<List<TeamDTO>> getTeams(
             @PathVariable("leagueId") Integer leagueId, @PathVariable("seasonYear") Integer seasonYear) {
 
-        var teams = teamRepository.findByLeague_ExternalIdAndSeason_Year(leagueId, seasonYear);
-        var dtos = internalTeamMapper.toTeamDTOS(teams);
+       var teams = teamService.getTeamsByLeagueIdAndSeasonYear(leagueId, seasonYear);
 
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(teams);
     }
 }

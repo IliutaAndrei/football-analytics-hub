@@ -1,9 +1,8 @@
 package org.iliuta.footballhub.client.dto.fixtures;
 
-public record ExternalFixtureTeamDTO(
+public record ExternalFixtureVenueDTO(
         Integer id,
         String name,
-        String logo,
-        Boolean winner
+        String city
 ) {
 }

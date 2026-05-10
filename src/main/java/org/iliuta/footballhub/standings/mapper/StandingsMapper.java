@@ -12,6 +12,8 @@ public interface StandingsMapper {
     @Mapping(source = "form", target = "form")
     StandingDTO toStandingDTO(ExternalStandingsSummaryDTO external);
 
+    @Mapping(source = "id", target = "externalId")
+    @Mapping(target = "id", ignore = true)
     TeamDTO toTeamDTO(ExternalTeamSummaryDTO external);
 
     @Mapping(source = "against", target = "againstGoals")
