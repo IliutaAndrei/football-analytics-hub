@@ -4,6 +4,7 @@ import org.iliuta.footballhub.client.dto.countries.ExternalCountryResponseDTO;
 import org.iliuta.footballhub.client.dto.fixtures.ExternalFixtureResponseDTO;
 import org.iliuta.footballhub.client.dto.fixtures.statistics.ExternalFixturesStatisticsResponseDTO;
 import org.iliuta.footballhub.client.dto.leagues.ExternalLeagueResponseDTO;
+import org.iliuta.footballhub.client.dto.players.ExternalPlayerResponseDTO;
 import org.iliuta.footballhub.client.dto.seasons.ExternalTeamSeasonsResponseDTO;
 import org.iliuta.footballhub.client.dto.standings.ExternalStandingsResponseDTO;
 import org.iliuta.footballhub.client.dto.statistics.ExternalTeamStatisticsResponseDTO;
@@ -133,6 +134,46 @@ public class FootballApiClient {
                         .build())
                 .retrieve()
                 .bodyToMono(ExternalFixturesStatisticsResponseDTO.class)
+                .block();
+    }
+
+    public ExternalPlayerResponseDTO getPlayerProfileByPlayerId(Integer playerId) {
+        return footballClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/players/profiles")
+                        .queryParam("player", playerId)
+                        .build())
+                .retrieve()
+                .bodyToMono(ExternalPlayerResponseDTO.class)
+                .block();
+    }
+
+    public ExternalPlayerResponseDTO getPlayersByTeamIdSeasonYearAndPage(Integer teamId,Integer seasonYear, Integer page) {
+        return footballClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/players")
+                        .queryParam("team", teamId)
+                        .queryParam("season", seasonYear)
+                        .queryParam("page", page)
+                        .build())
+                .retrieve()
+                .bodyToMono(ExternalPlayerResponseDTO.class)
+                .block();
+    }
+
+    public ExternalPlayerResponseDTO getPlayerStatistics(Integer playerId, Integer seasonYear, Integer leagueId) {
+        return footballClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/players")
+                        .queryParam("id", playerId)
+                        .queryParam("season", seasonYear)
+                        .queryParam("league", leagueId)
+                        .build())
+                .retrieve()
+                .bodyToMono(ExternalPlayerResponseDTO.class)
                 .block();
     }
 }

@@ -16,6 +16,7 @@ public interface InternalTeamMapper {
     @Mapping(target = "leagueId", source = "league.externalId")
     @Mapping(target = "seasonYear", source = "season.year")
     TeamDTO toTeamDTO(TeamEntity entity);
+
     List<TeamDTO> toTeamDTOS(List<TeamEntity> entities);
 
     VenueDTO toVenueDTO(VenueEntity entity);
