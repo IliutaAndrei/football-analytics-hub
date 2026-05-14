@@ -2,6 +2,7 @@ package org.iliuta.footballhub.client;
 
 import org.iliuta.footballhub.client.dto.countries.ExternalCountryResponseDTO;
 import org.iliuta.footballhub.client.dto.fixtures.ExternalFixtureResponseDTO;
+import org.iliuta.footballhub.client.dto.fixtures.players.ExternalFixturesPlayersResponseDTO;
 import org.iliuta.footballhub.client.dto.fixtures.statistics.ExternalFixturesStatisticsResponseDTO;
 import org.iliuta.footballhub.client.dto.leagues.ExternalLeagueResponseDTO;
 import org.iliuta.footballhub.client.dto.players.ExternalPlayerResponseDTO;
@@ -174,6 +175,18 @@ public class FootballApiClient {
                         .build())
                 .retrieve()
                 .bodyToMono(ExternalPlayerResponseDTO.class)
+                .block();
+    }
+
+    public ExternalFixturesPlayersResponseDTO getPlayersByFixtureId(Integer fixtureId) {
+        return footballClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/fixtures/players")
+                        .queryParam("fixture", fixtureId)
+                        .build())
+                .retrieve()
+                .bodyToMono(ExternalFixturesPlayersResponseDTO.class)
                 .block();
     }
 }
