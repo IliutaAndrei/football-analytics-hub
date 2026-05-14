@@ -1,6 +1,6 @@
 # Football Analytics Hub
 
-A comprehensive football (soccer) analytics backend built with **Spring Boot**, consuming data from the [API-Football](https://www.api-football.com/) external API. This application provides structured access to football data including leagues, teams, players, fixtures, and detailed statistics.
+A comprehensive football analytics backend built with **Spring Boot**, consuming data from the [API-Football](https://www.api-football.com/) external API. This application provides structured access to football data including leagues, teams, players, fixtures, and detailed statistics.
 
 ## Tech Stack
 
