@@ -1,75 +1,252 @@
-Football Analytics Hub is a scalable backend application built with Java 21 and Spring Boot 3, designed to aggregate, process, and expose structured football data through a clean RESTful API.
+# Football Analytics Hub
 
-The system integrates with an external football data provider (API-Football) and transforms raw API responses into a well-defined internal domain model using a layered architecture and DTO-based mapping. The goal of the project is to build a production-ready, extensible backend platform that can support real-time data visualization, historical analysis, and future predictive analytics.
+A comprehensive football (soccer) analytics backend built with **Spring Boot**, consuming data from the [API-Football](https://www.api-football.com/) external API. This application provides structured access to football data including leagues, teams, players, fixtures, and detailed statistics.
 
-Architecture
+## Tech Stack
 
-The project follows a feature-based package structure and a clean layered architecture:
+- **Java 21**
+- **Spring Boot 3.3.5**
+- **Spring WebFlux** (WebClient for external API calls)
+- **Spring Data JPA** (Hibernate + PostgreSQL)
+- **MapStruct** (DTO mapping)
+- **Lombok**
+- **PostgreSQL**
 
-Controller Layer – exposes RESTful endpoints
+## Architecture
 
-Service Layer – contains business logic and data orchestration
+The application follows a layered architecture with clear separation between external API data and internal models:
 
-Client Layer – handles external API communication via WebClient
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Controller  │────▶│   Service   │────▶│   Mapper    │────▶│  DTO / Entity│
+└─────────────┘     └──────┬──────┘     └─────────────┘     └─────────────┘
+                           │
+                    ┌──────▼──────┐
+                    │  API Client  │──── External API (api-football.com)
+                    └─────────────┘
+```
 
-Mapper Layer – DTO transformation using MapStruct
+### Key Design Decisions
 
-DTO Model – clear separation between external and internal representations
+- **Static data** (countries, leagues, seasons, teams, players) is persisted in PostgreSQL
+- **Dynamic data** (fixtures, statistics, standings) is fetched live from the external API on each request
+- **External DTOs** mirror the API-Football JSON structure and live in `client/dto/`
+- **Internal DTOs** represent the frontend contract and live in each feature's `dto/` package
+- **Internal ↔ External ID translation** is handled in the service layer for persisted entities
 
-Key architectural principles:
+## Project Structure
 
-Separation of concerns
+```
+org.iliuta.footballhub
+├── client/                          # External API communication
+│   ├── config/                      #   WebClient configuration
+│   ├── dto/                         #   External DTOs (mirrors API-Football JSON)
+│   │   ├── countries/
+│   │   ├── fixtures/
+│   │   │   ├── players/
+│   │   │   └── statistics/
+│   │   ├── leagues/
+│   │   ├── players/
+│   │   ├── seasons/
+│   │   ├── standings/
+│   │   ├── statistics/
+│   │   └── teams/
+│   └── FootballApiClient.java       #   All external API calls
+│
+├── countries/                       # Countries feature
+│   ├── controller/
+│   ├── dto/
+│   ├── mapper/
+│   ├── service/
+│   ├── CountryEntity.java
+│   └── CountryRepository.java
+│
+├── leagues/                         # Leagues & Seasons feature
+│   ├── controller/
+│   ├── dto/
+│   ├── mapper/
+│   ├── service/
+│   ├── LeagueEntity.java
+│   ├── LeagueRepository.java
+│   ├── SeasonEntity.java
+│   └── SeasonRepository.java
+│
+├── teams/                           # Teams feature
+│   ├── controller/
+│   ├── dto/
+│   ├── mapper/
+│   ├── seasons/                     #   Team seasons sub-feature
+│   ├── statistics/                  #   Team statistics sub-feature
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── mapper/
+│   │   └── service/
+│   ├── service/
+│   ├── TeamEntity.java
+│   ├── TeamRepository.java
+│   ├── VenueEntity.java
+│   └── VenueRepository.java
+│
+├── standings/                       # League standings feature
+│   ├── controller/
+│   ├── dto/
+│   ├── mapper/
+│   └── service/
+│
+├── fixtures/                        # Fixtures feature
+│   ├── controller/
+│   ├── dto/
+│   ├── mapper/
+│   ├── service/
+│   ├── statistics/                  #   Fixture team statistics
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── mapper/
+│   │   └── service/
+│   └── players/                     #   Fixture player statistics
+│       ├── controller/
+│       ├── dto/
+│       ├── mapper/
+│       └── service/
+│
+├── players/                         # Players feature
+│   ├── dto/
+│   ├── mapper/
+│   ├── squad/                       #   Squad sub-feature (with pagination)
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── mapper/
+│   │   └── service/
+│   ├── profile/                     #   Player profile sub-feature
+│   │   ├── controller/
+│   │   └── service/
+│   ├── statistics/                  #   Player season statistics
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── mapper/
+│   │   └── service/
+│   ├── PlayerEntity.java
+│   └── PlayerRepository.java
+│
+└── FootballAnalyticsHubApplication.java
+```
 
-DTO-based data isolation
+## API Endpoints
 
-Clean API contracts
+### Countries
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/countries` | Get all available countries |
 
-Extensibility for future features
+### Leagues
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/countries/{countryId}/leagues` | Get leagues for a country |
 
-Current Features
+### Seasons
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/leagues/{leagueId}/seasons` | Get available seasons for a league |
 
-League retrieval by country
+### Teams & Standings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/leagues/{leagueId}/seasons/{year}/standings` | Get league standings |
+| GET | `/api/leagues/{leagueId}/seasons/{year}/teams` | Get teams for a league/season |
 
-Teams by league and season
+### Team Statistics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/teams/{teamId}/statistics` | Get team statistics for a season |
 
-Team seasons history
+### Fixtures
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/leagues/{leagueId}/seasons/{year}/fixtures` | Get all fixtures for a league/season |
 
-League standings (flattened and structured)
+### Fixture Statistics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/fixtures/{fixtureId}/statistics` | Get team statistics for a specific fixture |
+| GET | `/api/fixtures/{fixtureId}/players` | Get player statistics for a specific fixture |
 
-Team statistics (goals, fixtures, performance metrics)
+### Squad
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/teams/{teamId}/squad` | Get squad for a team (fetches and persists players) |
 
-Fixtures by team, league, and season (grouped into played and upcoming)
+### Player Profile
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/players/{playerId}/profile` | Get player profile details |
 
-Planned Extensions
+### Player Statistics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/players/{playerId}/statistics` | Get player season statistics (filtered by team and league) |
 
-Match events (goals, cards, substitutions)
+## Data Model
 
-Data persistence layer (PostgreSQL integration)
+### Persisted Entities (Static Data)
+- **CountryEntity** — country name, code, flag
+- **LeagueEntity** — league name, type, logo, linked to country
+- **SeasonEntity** — year, start/end dates, linked to league
+- **TeamEntity** — team name, logo, founded, linked to league + season + venue
+- **VenueEntity** — venue name, city, capacity
+- **PlayerEntity** — player profile (name, birth date, nationality, height, weight, position, photo), linked to team
 
-Historical data synchronization
+### Live Data (Fetched on Request)
+- Standings
+- Fixtures
+- Fixture Statistics (team-level)
+- Fixture Player Statistics
+- Player Season Statistics
 
-Caching strategies
+## Entity Relationships
 
-Advanced analytics and predictive modeling
+```
+Country ──1:N──▶ League ──1:N──▶ Season
+                    │
+                    └──1:N──▶ Team ──1:N──▶ Player
+                                │
+                                └──1:1──▶ Venue
+```
 
-Frontend integration (React-based UI)
+## Configuration
 
-Tech Stack
+### Environment Variables
 
-Java 21
+| Variable | Description |
+|----------|-------------|
+| `API_FOOTBALL_BASE_URL` | Base URL for API-Football (e.g., `https://v3.football.api-sports.io`) |
+| `API_FOOTBALL_KEY` | Your API-Football API key |
+| `SPRING_DATASOURCE_URL` | PostgreSQL connection URL |
+| `SPRING_DATASOURCE_USERNAME` | Database username |
+| `SPRING_DATASOURCE_PASSWORD` | Database password |
 
-Spring Boot 3
+### WebClient Configuration
 
-Spring Web
+The WebClient is configured with a `maxInMemorySize` of **2MB** to handle large API responses (e.g., 380 fixtures per season).
 
-WebClient
+## Getting Started
 
-MapStruct
+### Prerequisites
+- Java 21
+- PostgreSQL
+- API-Football API key ([get one here](https://www.api-football.com/))
 
-Lombok
+### Running the Application
 
-Maven
+1. Clone the repository
+2. Configure your database and API key in `application.properties` or via environment variables
+3. Run the application:
 
-Project Goal
+```bash
+mvn spring-boot:run
+```
 
-The objective of this project is to simulate a real-world, enterprise-style backend system capable of handling structured sports data while maintaining clean architecture, scalability, and maintainability standards suitable for production environments.
+The application will start on `http://localhost:8080`.
+
+## License
+
+This project was developed as a bachelor's thesis (licență).
