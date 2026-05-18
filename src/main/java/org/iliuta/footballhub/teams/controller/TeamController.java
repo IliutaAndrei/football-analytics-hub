@@ -8,13 +8,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("api/leagues")
 @RequiredArgsConstructor
 public class TeamController {
 
     private final TeamService teamService;
+
+    @GetMapping("/{leagueId}/seasons/{seasonYear}/teams/by-external-id/{externalTeamId}")
+    public ResponseEntity<TeamDTO> getTeamByExternalId(
+            @PathVariable Integer leagueId,
+            @PathVariable Integer seasonYear,
+            @PathVariable Integer externalTeamId) {
+
+        var team = teamService.getTeamByExternalIdInContext(externalTeamId, leagueId, seasonYear);
+        return ResponseEntity.ok(team);
+    }
 
 
     @GetMapping("/{leagueId}/seasons/{seasonYear}/teams/{teamId}")

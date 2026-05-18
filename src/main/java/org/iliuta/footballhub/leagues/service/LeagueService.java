@@ -1,6 +1,8 @@
 package org.iliuta.footballhub.leagues.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.iliuta.footballhub.client.FootballApiClient;
+import org.iliuta.footballhub.client.dto.leagues.ExternalLeagueDTO;
 import org.iliuta.footballhub.client.dto.leagues.ExternalLeagueInfoDTO;
 import org.iliuta.footballhub.client.dto.leagues.ExternalSeasonDTO;
 import org.iliuta.footballhub.countries.CountryEntity;
@@ -21,6 +23,7 @@ import java.util.List;
 
 @Service
 @Transactional
+@Slf4j
 public class LeagueService {
 
     private final SeasonRepository seasonRepository;
@@ -31,9 +34,11 @@ public class LeagueService {
     private final FootballApiClient footballApiClient;
 
     public LeagueService(
-            SeasonRepository seasonRepository, CountryService countryService,
+            SeasonRepository seasonRepository,
+            CountryService countryService,
             LeagueRepository leagueRepository,
-            ExternalLeagueMapper externalLeagueMapper, InternalLeagueMapper internalLeagueMapper,
+            ExternalLeagueMapper externalLeagueMapper,
+            InternalLeagueMapper internalLeagueMapper,
             FootballApiClient footballApiClient) {
         this.seasonRepository = seasonRepository;
         this.countryService = countryService;
@@ -43,70 +48,96 @@ public class LeagueService {
         this.footballApiClient = footballApiClient;
     }
 
-    public void syncLeaguesByCountry(String countryCode) {
-        var response = footballApiClient.getLeaguesByCountry(countryCode);
-        for (var dto : response.response()) {
-            CountryEntity country = countryService.syncCountry(dto.country());
-            LeagueEntity league = syncLeague(dto.league(), country);
-            for (var seasonDto : dto.seasons()) {
-                syncSeason(seasonDto, league);
-            }
-        }
-    }
+    // PUBLIC API METHODS
 
-    public List<LeagueDTO> getLeaguesByCountryCode(String code) {
-        var leagues = leagueRepository.findByCountry_Code(code);
+    public List<LeagueDTO> getLeaguesByCountryCode(String countryCode) {
+        var leagues = leagueRepository.findByCountry_Code(countryCode);
 
         if (leagues.isEmpty()) {
-            syncLeaguesByCountry(code);
-            leagues = leagueRepository.findByCountry_Code(code);
+            log.info("No leagues found for country: {}. Syncing from external API.", countryCode);
+            syncLeaguesByCountry(countryCode);
+            leagues = leagueRepository.findByCountry_Code(countryCode);
         }
 
         return internalLeagueMapper.toLeagueDTOs(leagues);
     }
 
-    public List<SeasonDTO> getSeasonsByLeagueId(Integer id) {
-        var seasons = seasonRepository.findByLeague_Id(id);
+    public List<SeasonDTO> getSeasonsByLeagueId(Integer leagueId) {
+        // Verifică dacă league-ul există
+        var league = leagueRepository.findById(leagueId)
+                .orElseThrow(() -> new RuntimeException("League not found with id: " + leagueId));
+
+        var seasons = seasonRepository.findByLeague_Id(leagueId);
+
+        if (seasons.isEmpty()) {
+            log.warn("No seasons found for league: {} ({}). This might indicate missing data.",
+                    league.getName(), leagueId);
+        }
 
         return internalLeagueMapper.toSeasonDTOs(seasons);
     }
 
-    private SeasonEntity syncSeason(ExternalSeasonDTO external, LeagueEntity league) {
+    // SYNCHRONIZATION METHODS
 
-        var existing =
-                seasonRepository.findByLeagueAndYear(league, external.year());
+    public void syncLeaguesByCountry(String countryCode) {
+        try {
+            var response = footballApiClient.getLeaguesByCountry(countryCode);
 
-        if (existing.isPresent()) {
-            var season = existing.get();
-            externalLeagueMapper.updateSeasonEntity(season, external);
-            season.setLeague(league);
+            if (response == null || response.response() == null || response.response().isEmpty()) {
+                log.warn("No leagues returned from API for country: {}", countryCode);
+                return;
+            }
 
-            return season;
+            for (var leagueData : response.response()) {
+                syncSingleLeague(leagueData);
+            }
+
+            log.info("Successfully synced {} leagues for country: {}",
+                    response.response().size(), countryCode);
+        } catch (Exception e) {
+            log.error("Failed to sync leagues for country: {}", countryCode, e);
+            throw new RuntimeException("Failed to sync leagues for country: " + countryCode, e);
         }
+    }
 
-        var newSeason = externalLeagueMapper.toSeasonEntity(external);
-        newSeason.setLeague(league);
+    // PRIVATE HELPER METHODS
 
-        return seasonRepository.save(newSeason);
+    private void syncSingleLeague(ExternalLeagueDTO leagueData) {
+        CountryEntity country = countryService.syncCountry(leagueData.country());
+        LeagueEntity league = syncLeague(leagueData.league(), country);
+
+        for (var seasonDto : leagueData.seasons()) {
+            syncSeason(seasonDto, league);
+        }
     }
 
     private LeagueEntity syncLeague(ExternalLeagueInfoDTO external, CountryEntity country) {
-
         var existing = leagueRepository.findByExternalId(external.id());
 
         if (existing.isPresent()) {
             var league = existing.get();
             externalLeagueMapper.updateLeagueEntity(league, external);
             league.setCountry(country);
-
             return league;
         }
 
         var newLeague = externalLeagueMapper.toLeagueEntity(external);
         newLeague.setCountry(country);
-
         return leagueRepository.save(newLeague);
     }
 
+    private SeasonEntity syncSeason(ExternalSeasonDTO external, LeagueEntity league) {
+        var existing = seasonRepository.findByLeagueAndYear(league, external.year());
 
+        if (existing.isPresent()) {
+            var season = existing.get();
+            externalLeagueMapper.updateSeasonEntity(season, external);
+            season.setLeague(league);
+            return season;
+        }
+
+        var newSeason = externalLeagueMapper.toSeasonEntity(external);
+        newSeason.setLeague(league);
+        return seasonRepository.save(newSeason);
+    }
 }

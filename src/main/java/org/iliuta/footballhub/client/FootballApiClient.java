@@ -138,18 +138,6 @@ public class FootballApiClient {
                 .block();
     }
 
-    public ExternalPlayerResponseDTO getPlayerProfileByPlayerId(Integer playerId) {
-        return footballClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/players/profiles")
-                        .queryParam("player", playerId)
-                        .build())
-                .retrieve()
-                .bodyToMono(ExternalPlayerResponseDTO.class)
-                .block();
-    }
-
     public ExternalPlayerResponseDTO getPlayersByTeamIdSeasonYearAndPage(Integer teamId,Integer seasonYear, Integer page) {
         return footballClient
                 .get()
