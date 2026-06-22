@@ -9,7 +9,6 @@ import org.iliuta.footballhub.countries.CountryEntity;
 import org.iliuta.footballhub.countries.service.CountryService;
 import org.iliuta.footballhub.leagues.LeagueEntity;
 import org.iliuta.footballhub.leagues.LeagueRepository;
-import org.iliuta.footballhub.leagues.SeasonEntity;
 import org.iliuta.footballhub.leagues.SeasonRepository;
 import org.iliuta.footballhub.leagues.dto.LeagueDTO;
 import org.iliuta.footballhub.leagues.dto.SeasonDTO;
@@ -63,7 +62,6 @@ public class LeagueService {
     }
 
     public List<SeasonDTO> getSeasonsByLeagueId(Integer leagueId) {
-        // Verifică dacă league-ul există
         var league = leagueRepository.findById(leagueId)
                 .orElseThrow(() -> new RuntimeException("League not found with id: " + leagueId));
 
@@ -126,18 +124,18 @@ public class LeagueService {
         return leagueRepository.save(newLeague);
     }
 
-    private SeasonEntity syncSeason(ExternalSeasonDTO external, LeagueEntity league) {
+    private void syncSeason(ExternalSeasonDTO external, LeagueEntity league) {
         var existing = seasonRepository.findByLeagueAndYear(league, external.year());
 
         if (existing.isPresent()) {
             var season = existing.get();
             externalLeagueMapper.updateSeasonEntity(season, external);
             season.setLeague(league);
-            return season;
+            return;
         }
 
         var newSeason = externalLeagueMapper.toSeasonEntity(external);
         newSeason.setLeague(league);
-        return seasonRepository.save(newSeason);
+        seasonRepository.save(newSeason);
     }
 }

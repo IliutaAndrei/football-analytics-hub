@@ -17,12 +17,6 @@ public class CountryController {
         this.countryService = countryService;
     }
 
-    @PostMapping("/sync")
-    public ResponseEntity<Void> syncAllCountries() {
-        countryService.syncAllCountries();
-
-        return ResponseEntity.noContent().build();
-    }
 
     @GetMapping
     public ResponseEntity<List<CountryDTO>> getAllCountries() {

@@ -11,10 +11,13 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping("api/leagues")
-@RequiredArgsConstructor
 public class TeamController {
 
     private final TeamService teamService;
+
+    public TeamController(TeamService teamService) {
+        this.teamService = teamService;
+    }
 
     @GetMapping("/{leagueId}/seasons/{seasonYear}/teams/by-external-id/{externalTeamId}")
     public ResponseEntity<TeamDTO> getTeamByExternalId(
